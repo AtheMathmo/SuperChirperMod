@@ -95,7 +95,7 @@ namespace SuperChirper
             {
                 // Clear all messages in Chirpy and hide the window
                 chirpPane.ClearMessages();
-                //ChirpPanel.instance.Hide();
+                ChirpPanel.instance.Hide();
                 // Give intro message
                 ChirpMessage introMessage = new ChirpMessage("SuperChirpy", "Welcome to Super Chirpy!", 12345);
                 chirpPane.AddMessage(introMessage, true);
