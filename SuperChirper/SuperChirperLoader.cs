@@ -19,7 +19,7 @@ namespace SuperChirper
 
             if (chirpPane == null) return;
 
-            // Give intro message
+            // Give intro message (currently doesn't show up)
             ChirpMessage introMessage = new ChirpMessage("SuperChirpy", "Welcome to Super Chirpy!", 12345);
             chirpPane.AddMessage(introMessage, true);
 

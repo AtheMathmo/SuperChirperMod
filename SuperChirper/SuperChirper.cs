@@ -36,6 +36,7 @@ namespace SuperChirper
             if (accessChirper == null)
                 accessChirper = chirper;
 
+            //Intro message - currently doesn#t show up.
             ChirpPanel.instance.AddMessage(new ChirpMessage("SuperChirper", "Welcome to SuperChirper!", 12345), true);
 
             messageManager = GameObject.Find("MessageManager").GetComponent<MessageManager>();
