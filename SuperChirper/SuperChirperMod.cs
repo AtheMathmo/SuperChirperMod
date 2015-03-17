@@ -10,6 +10,7 @@ using UnityEngine;
  * https://gist.github.com/reima/9ba51c69f65ae2da7909
  * https://github.com/skymodteam/skymod-chirpymaid
  * https://github.com/mabako/reddit-for-city-skylines
+ * /u/Zuppis and his ChirpFilter mod: http://steamcommunity.com/sharedfiles/filedetails/?id=407871375
  * 
  * 
  */
@@ -64,7 +65,7 @@ namespace SuperChirper
 
         public string Description
         {
-            get { return "Makes Chirpy beautiful."; }
+            get { return "Adds CLEAR and MUTE functionality to Chirpy."; }
         }
     }    
 }

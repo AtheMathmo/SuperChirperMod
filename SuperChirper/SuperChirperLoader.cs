@@ -51,30 +51,30 @@ namespace SuperChirper
 
             GameObject clearButtonObject = new GameObject("SuperChirperClearButton", typeof(UIButton));
             GameObject muteButtonObject = new GameObject("SuperChirperMuteButton", typeof(UIButton));
-            GameObject filterButtonObject = new GameObject("SuperChirperFilterButton", typeof(UIButton));
+            //GameObject filterButtonObject = new GameObject("SuperChirperFilterButton", typeof(UIButton));
 
             // Make the buttonObject a child of the uiView.
             clearButtonObject.transform.parent = chirpPane.transform;
             muteButtonObject.transform.parent = chirpPane.transform;
-            filterButtonObject.transform.parent = chirpPane.transform;
+            //filterButtonObject.transform.parent = chirpPane.transform;
 
             // Get the button component.
             UIButton clearButton = clearButtonObject.GetComponent<UIButton>();
             UIButton muteButton = muteButtonObject.GetComponent<UIButton>();
-            UIButton filterButton = filterButtonObject.GetComponent<UIButton>();
+            //UIButton filterButton = filterButtonObject.GetComponent<UIButton>();
 
             // Set the text to show on the button.
             clearButton.text = "Clear";
             muteButton.text = "Mute";
-            filterButton.text = "Filter";
+            //filterButton.text = "Filter";
 
             // Set the button dimensions. 
             clearButton.width = 50;
             clearButton.height = 20;
             muteButton.width = 50;
             muteButton.height = 20;
-            filterButton.width = 50;
-            filterButton.height = 20;
+            //filterButton.width = 50;
+            //filterButton.height = 20;
 
             // Style the buttons to make them look like a menu button.
             clearButton.normalBgSprite = "ButtonMenu";
@@ -98,7 +98,7 @@ namespace SuperChirper
             muteButton.hoveredTextColor = new Color32(7, 132, 255, 255);
             muteButton.focusedTextColor = new Color32(255, 255, 255, 255);
             muteButton.pressedTextColor = new Color32(30, 30, 44, 255);
-
+            /*
             filterButton.normalBgSprite = "ButtonMenu";
             filterButton.disabledBgSprite = "ButtonMenuDisabled";
             filterButton.hoveredBgSprite = "ButtonMenuHovered";
@@ -109,25 +109,26 @@ namespace SuperChirper
             filterButton.hoveredTextColor = new Color32(7, 132, 255, 255);
             filterButton.focusedTextColor = new Color32(255, 255, 255, 255);
             filterButton.pressedTextColor = new Color32(30, 30, 44, 255);
+             */
 
             // Enable sounds.
             clearButton.playAudioEvents = true;
             muteButton.playAudioEvents = true;
-            filterButton.playAudioEvents = true;
+            //filterButton.playAudioEvents = true;
 
             // Place the button.
             clearButton.transformPosition = new Vector3(-1.22f, 1.0f);
             muteButton.transformPosition = new Vector3(-1.37f, 1.0f);
-            filterButton.transformPosition = new Vector3(-1.57f, 1.0f);
+            //filterButton.transformPosition = new Vector3(-1.52f, 1.0f);
 
             // Respond to button click.
             clearButton.eventClick += ClearButtonClick;
             muteButton.eventClick += MuteButtonClick;
-            filterButton.eventClick += FilterButtonClick;
+            //filterButton.eventClick += FilterButtonClick;
 
             SuperChirperMod.ClearButtonInstance = clearButton;
             SuperChirperMod.MuteButtonInstance = muteButton;
-            SuperChirperMod.FilterButtonInstance = filterButton;
+            //SuperChirperMod.FilterButtonInstance = filterButton;
 
         }
 

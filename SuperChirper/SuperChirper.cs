@@ -14,7 +14,7 @@ namespace SuperChirper
         private static ChirpPanel chirpPane;
         private static MessageManager messageManager;
 
-               
+        private bool userOpened = false;
 
         private static bool isMuted = false;
         // Currently not used.
@@ -74,7 +74,6 @@ namespace SuperChirper
         //Thread: Main
         public override void OnUpdate()
         {
-            /*
             if (isMuted)
             {
                 // Collapse and clear only when a new message is received. (Otherwise can not open once muted.)
@@ -82,7 +81,9 @@ namespace SuperChirper
                 {
                     
                     chirpPane.ClearMessages();
-                    chirpPane.Collapse();
+                    // Check if user had window open before.
+                    if (!userOpened)
+                        chirpPane.Collapse();
                     newMsgIn = false;
                 }
             } 
@@ -90,8 +91,6 @@ namespace SuperChirper
             {
                 // Room for further implementation in the future. (Potentially filtering etc.)
             }
-             * 
-             */
 
 
         }
@@ -99,15 +98,12 @@ namespace SuperChirper
         //Thread: Main
         public override void OnNewMessage(IChirperMessage message)
         {
+            userOpened = chirpPane.isShowing;
+
             DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "[SuperChirper] Message received");
             newMsgIn = true;
 
-            // Ideally we want to filter at this stage, but currently the DeleteMessage doesn't work.
-            if (isMuted)
-            {
-                DeleteMessage(message);
-            }
-            else if (!isMuted)
+            if (!isMuted)
             {
 
             }
@@ -120,11 +116,10 @@ namespace SuperChirper
             DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "[SuperChirper] Total Children:" + container.childCount);
 
             for (int i = 0; i < container.childCount; ++i)
-            {
-                DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "[SuperChirper] Delete Message:" + message.text);
-                DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "[SuperChirper] Contained Message:" + container.GetChild(i).GetComponentInChildren<UILabel>().text);
+            {  
                 if (container.GetChild(i).GetComponentInChildren<UILabel>().text.Equals(message.text))
                 {
+                    DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "[SuperChirper] Deleted Message:" + message.text);
                     UITemplateManager.RemoveInstance("ChirpTemplate", container.GetChild(i).GetComponent<UIPanel>());
                     messageManager.DeleteMessage(message);
                     chirpPane.Collapse();
