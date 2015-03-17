@@ -11,11 +11,15 @@ namespace SuperChirper
     public class SuperChirper : ChirperExtensionBase
     {
         // Chirper instance to adopt the game instance.
-        public static IChirper accessChirper;
-        MessageManager messageManager;
-        
+        private static ChirpPanel chirpPane;
+        private static MessageManager messageManager;
+
+        private static AudioClip messageSound = null;        
 
         private static bool isMuted = false;
+        private static bool isFiltered = false;
+        
+        private bool newMsgIn = false;
 
         public static bool IsMuted
         {
@@ -29,42 +33,93 @@ namespace SuperChirper
             }
         }
 
+        public static bool IsFiltered
+        {
+            get
+            {
+                return isFiltered;
+            }
+            set
+            {
+                isFiltered = value;
+            }
+        }
+
+        public static AudioClip MessageSound
+        {
+            get
+            {
+                return messageSound;
+            }
+            set
+            {
+                messageSound = value;
+            }
+        }
+
 
         //Thread: Main
         public override void OnCreated(IChirper chirper)
         {
-            if (accessChirper == null)
-                accessChirper = chirper;
+            try
+            {
+                chirpPane = GameObject.Find("ChirperPanel").GetComponent<ChirpPanel>();
+                messageManager = GameObject.Find("MessageManager").GetComponent<MessageManager>();
 
-            //Intro message - currently doesn#t show up.
-            ChirpPanel.instance.AddMessage(new ChirpMessage("SuperChirper", "Welcome to SuperChirper!", 12345), true);
+                messageSound = chirpPane.m_NotificationSound;
 
-            messageManager = GameObject.Find("MessageManager").GetComponent<MessageManager>();
-
-            DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "[SuperChirper] Initialised modification");
+                DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "[SuperChirper] Initialised modification.");
+            }
+            catch
+            {
+                DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "[SuperChirper] Initialisation failed.");
+            }
+            
         }
 
         //Thread: Main
         public override void OnReleased()
         {
-
+            chirpPane.m_NotificationSound = messageSound;
         }
 
         //Thread: Main
         public override void OnUpdate()
         {
+            
             if (isMuted)
             {
-                //ChirpPanel.instance.ClearMessages();
+                // Collapse and clear only when a new message is received. (Otherwise can not open once muted.)
+                if (newMsgIn)
+                {
+                    chirpPane.ClearMessages();
+                    chirpPane.Collapse();
+                    newMsgIn = false;
+                }
             } else if (!isMuted)
             {
 
             }
+            
+            
+             
         }
 
         //Thread: Main
         public override void OnNewMessage(IChirperMessage message)
         {
+            /*
+             * Checks if message is garbage, if so removes it.
+            CitizenMessage cm = message as CitizenMessage;
+
+            if (cm == null)
+            {
+                DeleteMessage(message);
+            }
+            */
+
+            newMsgIn = true;
+            chirpPane.m_NotificationSound = messageSound;
             if (isMuted)
             {
                 //DeleteMessage(message);
@@ -78,12 +133,14 @@ namespace SuperChirper
         // Custom method to delete messages
         private void DeleteMessage(IChirperMessage message)
         {
+            var container = ChirpPanel.instance.transform.FindChild("Chirps").FindChild("Clipper").FindChild("Container").gameObject.transform;
             for (int i = 0; i < ChirpPanel.instance.transform.childCount; i++)
             {
-                if (message.text.Equals(ChirpPanel.instance.transform.GetChild(i).GetComponentInChildren<UILabel>().text))
+                if (message.text.Equals(container.GetChild(i).GetComponentInChildren<UILabel>().text))
                 {
-                    UITemplateManager.RemoveInstance("ChirpTemplate", ChirpPanel.instance.transform.GetChild(i).GetComponent<UIPanel>());
+                    UITemplateManager.RemoveInstance("ChirpTemplate", container.GetChild(i).GetComponent<UIPanel>());
                     messageManager.DeleteMessage(message);
+                    chirpPane.Collapse();
                     return;
                 }
             }

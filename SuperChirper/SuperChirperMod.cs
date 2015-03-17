@@ -3,12 +3,23 @@ using ICities;
 using System;
 using UnityEngine;
 
+/*
+ *  I've tried to give credit throughout to the appropriate people, but here is a list of the work used here:
+ *  
+ * http://www.reddit.com/r/CitiesSkylinesModding/comments/2ymwxe/example_code_using_the_colossal_ui_in_a_user_mod/ 
+ * https://gist.github.com/reima/9ba51c69f65ae2da7909
+ * https://github.com/skymodteam/skymod-chirpymaid
+ * https://github.com/mabako/reddit-for-city-skylines
+ * 
+ * 
+ */
 namespace SuperChirper
 {
     public class SuperChirperMod : IUserMod
     {
         private static UIButton clearButtonInstance;
         private static UIButton muteButtonInstance;
+        private static UIButton filterButtonInstance;
 
         public static UIButton ClearButtonInstance
         {
@@ -31,6 +42,18 @@ namespace SuperChirper
             set
             {
                 muteButtonInstance = value;
+            }
+        }
+
+        public static UIButton FilterButtonInstance
+        {
+            get
+            {
+                return filterButtonInstance;
+            }
+            set
+            {
+                filterButtonInstance = value;
             }
         }
 

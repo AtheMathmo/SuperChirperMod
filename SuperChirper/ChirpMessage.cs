@@ -5,7 +5,7 @@ using ICities;
 using UnityEngine;
 
 
-public class ChirpMessage : IChirperMessage
+public class ChirpMessage : MessageBase
 {
     private string message;
     private string sender;
@@ -18,18 +18,44 @@ public class ChirpMessage : IChirperMessage
         this.id = id;
     }
 
-    public uint senderID
+    public override uint GetSenderID()
     {
-        get { return id; }
+        return id;
+
     }
 
-    public string senderName
+    public override string GetSenderName()
     {
-        get { return sender; }
+        return sender;
     }
 
-    public string text
+    public override string GetText()
     {
-        get { return message; }
+        return message;
     }
+
+    public override bool IsSimilarMessage(MessageBase other)
+    {
+        var m = other as ChirpMessage;
+        return m != null && ((m.sender == sender && m.id == id) || m.message.Replace("#", "") == message.Replace("#", ""));
+    }
+
+    public override void Serialize(ColossalFramework.IO.DataSerializer s)
+    {
+        s.WriteSharedString(sender);
+        s.WriteInt32((int) id);
+        s.WriteSharedString(message);
+    }
+
+    public override void Deserialize(ColossalFramework.IO.DataSerializer s)
+    {
+        sender = s.ReadSharedString();
+        id = (uint) s.ReadInt32();
+        message = s.ReadSharedString();
+    }
+
+    public override void AfterDeserialize(ColossalFramework.IO.DataSerializer s)
+    {
+    }
+
 }
