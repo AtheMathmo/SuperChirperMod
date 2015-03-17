@@ -13,12 +13,28 @@ namespace SuperChirper
          private static ChirpPanel chirpPane;
          private MessageManager messageManager;
 
+         private static AudioClip messageSound = null; 
+
+         public static AudioClip MessageSound
+         {
+             get
+             {
+                 return messageSound;
+             }
+             set
+             {
+                 messageSound = value;
+             }
+         }
+
         public override void OnLevelLoaded(LoadMode mode)
         {
             chirpPane = GameObject.Find("ChirperPanel").GetComponent<ChirpPanel>();
             messageManager = GameObject.Find("MessageManager").GetComponent<MessageManager>();
 
             if (chirpPane == null) return;
+
+            messageSound = chirpPane.m_NotificationSound;
 
             #region "NewGame"
             // Give intro message (only shows up on new level)
@@ -135,7 +151,7 @@ namespace SuperChirper
                 {
                     // Unmute the chirper, let it make noise.
                     SuperChirper.IsMuted = false;
-                    chirpPane.m_NotificationSound = SuperChirper.MessageSound;
+                    chirpPane.m_NotificationSound = messageSound;
 
                     // Inform user that chirpy has been unmuted
                     chirpPane.AddMessage(new ChirpMessage("SuperChirper","Chirpy now unmuted.",12345), true);
