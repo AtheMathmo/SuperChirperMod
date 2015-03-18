@@ -36,9 +36,22 @@ namespace SuperChirper
 
             messageSound = chirpPane.m_NotificationSound;
 
+            GameObject gameObject = GameObject.Find("ChirperFilterModule");
+            if (gameObject != null)
+            {
+                DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "[SuperChirper] ChirpFilters located.");
+                SuperChirper.HasFilters = true;
+                SuperChirper.ChirpFilter_FilterModule = gameObject.GetComponent("ChirpFilter.FilterModule");
+            }
+            else if (gameObject == null)
+            {
+                DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "[SuperChirper] ChirpFilters NOT located.");
+                SuperChirper.HasFilters = false;
+            }
+
             #region "NewGame"
             // Give intro message (only shows up on new level)
-            ChirpMessage introMessage = new ChirpMessage("SuperChirpy", "Welcome to Super Chirpy!", 12345);
+            ChirpMessage introMessage = new ChirpMessage("SuperChirpy", "Welcome to Super Chirpy! Press Alt+C to toggle Chirpy, use buttons above to MUTE and CLEAR.", 12345);
             // Get rid of default message
             chirpPane.ClearMessages();
             chirpPane.AddMessage(introMessage);
@@ -51,7 +64,7 @@ namespace SuperChirper
 
             GameObject clearButtonObject = new GameObject("SuperChirperClearButton", typeof(UIButton));
             GameObject muteButtonObject = new GameObject("SuperChirperMuteButton", typeof(UIButton));
-            //GameObject filterButtonObject = new GameObject("SuperChirperFilterButton", typeof(UIButton));
+            GameObject filterButtonObject = new GameObject("SuperChirperFilterButton", typeof(UIButton));
 
             // Make the buttonObject a child of the uiView.
             clearButtonObject.transform.parent = chirpPane.transform;
@@ -66,14 +79,14 @@ namespace SuperChirper
             // Set the text to show on the button.
             clearButton.text = "Clear";
             muteButton.text = "Mute";
-            //filterButton.text = "Filter";
+            //filterButton.text = "Filters: OFF";
 
             // Set the button dimensions. 
             clearButton.width = 50;
             clearButton.height = 20;
             muteButton.width = 50;
             muteButton.height = 20;
-            //filterButton.width = 50;
+            //filterButton.width = 90;
             //filterButton.height = 20;
 
             // Style the buttons to make them look like a menu button.
@@ -98,6 +111,7 @@ namespace SuperChirper
             muteButton.hoveredTextColor = new Color32(7, 132, 255, 255);
             muteButton.focusedTextColor = new Color32(255, 255, 255, 255);
             muteButton.pressedTextColor = new Color32(30, 30, 44, 255);
+
             /*
             filterButton.normalBgSprite = "ButtonMenu";
             filterButton.disabledBgSprite = "ButtonMenuDisabled";
@@ -119,7 +133,7 @@ namespace SuperChirper
             // Place the button.
             clearButton.transformPosition = new Vector3(-1.22f, 1.0f);
             muteButton.transformPosition = new Vector3(-1.37f, 1.0f);
-            //filterButton.transformPosition = new Vector3(-1.52f, 1.0f);
+            //filterButton.transformPosition = new Vector3(-1.57f, 1.0f);
 
             // Respond to button click.
             clearButton.eventClick += ClearButtonClick;
@@ -177,16 +191,26 @@ namespace SuperChirper
         {
             if (eventParam.buttons == UIMouseButton.Left && ChirpPanel.instance != null)
             {
-                if (SuperChirper.IsFiltered)
+                if (SuperChirper.HasFilters)
                 {
-                    SuperChirper.IsFiltered = false;
-                    chirpPane.AddMessage(new ChirpMessage("SuperChirper", "Test message", 12345), true);
+                    if (SuperChirper.IsFiltered)
+                    {
+                        SuperChirper.IsFiltered = false;
+                        chirpPane.AddMessage(new ChirpMessage("SuperChirper", "Filters removed.", 12345), true);
+                        SuperChirperMod.FilterButtonInstance.text = "Filters: OFF";
+                    }
+                    else if (!SuperChirper.IsFiltered)
+                    {
+                        SuperChirper.IsFiltered = true;
+                        chirpPane.AddMessage(new ChirpMessage("SuperChirper", "Filters applied.", 12345), true);
+                        SuperChirperMod.FilterButtonInstance.text = "Filters: ON";
+                    }
                 }
-                else if (!SuperChirper.IsFiltered)
+                else
                 {
-                    SuperChirper.IsFiltered = true;
-                    chirpPane.AddMessage(new ChirpMessage("SuperChirper", "Test message", 12345), true);
+                    chirpPane.AddMessage(new ChirpMessage("SuperChirper", "No filters found. Please install/activate ChirpFilters mod, by Zuppi.", 12345), true);
                 }
+                
 
             }
         }

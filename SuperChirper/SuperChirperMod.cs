@@ -65,7 +65,7 @@ namespace SuperChirper
 
         public string Description
         {
-            get { return "Adds CLEAR and MUTE functionality to Chirpy."; }
+            get { return "Adds CLEAR and MUTE functionality to Chirpy. Press Alt+C to toggle Chirpy."; }
         }
     }    
 }
