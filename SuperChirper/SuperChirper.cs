@@ -151,7 +151,7 @@ namespace SuperChirper
                     bool filter = ChirpFilter.FilterMessage(cm.m_messageID);
 
                     // Check if we should make noise
-                    chirpPane.m_NotificationSound = (filter ? null : SuperChirperLoader.MessageSound);
+                    chirpPane.m_NotificationSound = ((isFiltered && filter) ? null : SuperChirperLoader.MessageSound);
 
                     messageFilterMap.Add(message, filter);
                 }
@@ -163,8 +163,6 @@ namespace SuperChirper
 
             }
         }
-
-
 
         // Custom method to delete messages (currently not used)
         private void DeleteMessage(IChirperMessage message)
