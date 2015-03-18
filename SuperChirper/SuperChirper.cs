@@ -14,7 +14,6 @@ namespace SuperChirper
         private static ChirpPanel chirpPane;
         private static MessageManager messageManager;
 
-        private static Component chirpFilter_FilterModule;
         private Dictionary<IChirperMessage, bool> messageFilterMap;
 
         private bool userOpened = false;
@@ -25,18 +24,6 @@ namespace SuperChirper
 
         private bool newMsgIn = false;
 
-        public static Component ChirpFilter_FilterModule
-        {
-            get
-            {
-                return chirpFilter_FilterModule;
-            }
-            set
-            {
-                chirpFilter_FilterModule = value;
-            }
-
-        }
         public static bool IsMuted
         {
             get
@@ -108,6 +95,7 @@ namespace SuperChirper
                 if (newMsgIn)
                 {
                     chirpPane.ClearMessages();
+                    messageFilterMap.Clear();
                     // Check if user had window open before.
                     if (!userOpened)
                         chirpPane.Collapse();
@@ -117,23 +105,26 @@ namespace SuperChirper
             else if (!isMuted)
             {
                 // Room for further implementation in the future. (Potentially filtering etc.)
-                /*
-                 * Currently not implemented.
-                if (isFiltered)
+                
+                if (isFiltered && !hasFilters)
                 {
                     FilterMessages();
                 }
-                 */
-
+                 
             }
 
             // Detect keypress - Alt+C
             if (Event.current.alt && Input.GetKeyDown(KeyCode.C))
             {
-                DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "[SuperChirper] Alt+C detected.");
+                DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "[SuperChirper] Chirpy toggled.");
 
                 // Toggle chirpy
                 chirpPane.gameObject.SetActive(!chirpPane.gameObject.activeSelf);
+
+                /*
+                 * TODO:
+                 * Stop messages not clearing when we reactivate after muting
+                 */
 
             }
 
@@ -143,28 +134,33 @@ namespace SuperChirper
         //Thread: Main
         public override void OnNewMessage(IChirperMessage message)
         {
+            // To make mute collapsing work better.
             userOpened = chirpPane.isShowing;
+            newMsgIn = true;
 
             DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "[SuperChirper] Message received");
-            newMsgIn = true;
 
             if (!isMuted)
             {
-                bool filter = false;
-                if (chirpFilter_FilterModule is IFormattable)
+                // Cast message and check whether it should be filtered.
+                CitizenMessage cm = message as CitizenMessage;
+
+                if (cm != null)
                 {
-                    IFormattable formattable = chirpFilter_FilterModule as IFormattable;
-                    string text = formattable.ToString(message.text, null);
-                    if (text == "true")
-                    {
-                        filter = true;
-                    }
-                    else if (text == "false")
-                    {
-                        filter = false;
-                    }
+                    // Check if message is garbage
+                    bool filter = ChirpFilter.FilterMessage(cm.m_messageID);
+
+                    // Check if we should make noise
+                    chirpPane.m_NotificationSound = (filter ? null : SuperChirperLoader.MessageSound);
+
+                    messageFilterMap.Add(message, filter);
                 }
-                messageFilterMap.Add(message, filter);
+                else
+                {
+                    // Default to unfiltered messages.
+                    messageFilterMap.Add(message, false);
+                }
+
             }
         }
 
@@ -174,8 +170,6 @@ namespace SuperChirper
         private void DeleteMessage(IChirperMessage message)
         {
             Transform container = chirpPane.transform.FindChild("Chirps").FindChild("Clipper").FindChild("Container").gameObject.transform;
-            
-            DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "[SuperChirper] Total Children:" + container.childCount);
 
             for (int i = 0; i < container.childCount; ++i)
             {
@@ -184,22 +178,30 @@ namespace SuperChirper
                     DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "[SuperChirper] Deleted Message:" + message.text);
                     UITemplateManager.RemoveInstance("ChirpTemplate", container.GetChild(i).GetComponent<UIPanel>());
                     messageManager.DeleteMessage(message);
-                    chirpPane.Collapse();
+                    if (!userOpened)
+                        chirpPane.Collapse();
                     return;
                 }
             }
         }
+
         // Custom method to filter all messages (currently not used)
         private void FilterMessages()
         {
             Transform container = chirpPane.transform.FindChild("Chirps").FindChild("Clipper").FindChild("Container").gameObject.transform;
-            DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "[SuperChirper] Total Children:" + container.childCount);
 
-            for (int i = 0; i < container.childCount; ++i)
+            foreach (IChirperMessage message in messageFilterMap.Keys)
             {
+                bool filtered;
+                messageFilterMap.TryGetValue(message, out filtered);
 
-
+                if (filtered)
+                {
+                    DeleteMessage(message);
+                    messageFilterMap.Remove(message);
+                }
             }
+            
         }
     }
 }

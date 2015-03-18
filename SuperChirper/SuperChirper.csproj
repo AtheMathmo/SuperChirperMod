@@ -56,6 +56,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChirpFilter.cs" />
     <Compile Include="ChirpMessage.cs" />
     <Compile Include="SuperChirper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

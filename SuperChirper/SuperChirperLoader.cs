@@ -36,14 +36,14 @@ namespace SuperChirper
 
             messageSound = chirpPane.m_NotificationSound;
 
-            GameObject gameObject = GameObject.Find("ChirperFilterModule");
-            if (gameObject != null)
+            // We check if ChirpFilters mod is installed - if it is we don't worry about handling our own filters.
+            GameObject chirperFilter = GameObject.Find("ChirperFilterModule");
+            if (chirperFilter != null)
             {
                 DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "[SuperChirper] ChirpFilters located.");
                 SuperChirper.HasFilters = true;
-                SuperChirper.ChirpFilter_FilterModule = gameObject.GetComponent("ChirpFilter.FilterModule");
             }
-            else if (gameObject == null)
+            else if (chirperFilter == null)
             {
                 DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "[SuperChirper] ChirpFilters NOT located.");
                 SuperChirper.HasFilters = false;
@@ -57,6 +57,7 @@ namespace SuperChirper
             chirpPane.AddMessage(introMessage);
             #endregion
 
+
             // Credit to:
             // http://www.reddit.com/r/CitiesSkylinesModding/comments/2ymwxe/example_code_using_the_colossal_ui_in_a_user_mod/
             // https://gist.github.com/reima/9ba51c69f65ae2da7909
@@ -69,25 +70,30 @@ namespace SuperChirper
             // Make the buttonObject a child of the uiView.
             clearButtonObject.transform.parent = chirpPane.transform;
             muteButtonObject.transform.parent = chirpPane.transform;
-            //filterButtonObject.transform.parent = chirpPane.transform;
+            filterButtonObject.transform.parent = chirpPane.transform;
 
             // Get the button component.
             UIButton clearButton = clearButtonObject.GetComponent<UIButton>();
             UIButton muteButton = muteButtonObject.GetComponent<UIButton>();
-            //UIButton filterButton = filterButtonObject.GetComponent<UIButton>();
+            UIButton filterButton = filterButtonObject.GetComponent<UIButton>();
 
             // Set the text to show on the button.
             clearButton.text = "Clear";
             muteButton.text = "Mute";
-            //filterButton.text = "Filters: OFF";
+            
+            // Defaults to on if ChirpFilter is active.
+            if (SuperChirper.HasFilters)
+                filterButton.text = "Filters: ON";
+            else
+                filterButton.text = "Filters: OFF";
 
             // Set the button dimensions. 
             clearButton.width = 50;
             clearButton.height = 20;
             muteButton.width = 50;
             muteButton.height = 20;
-            //filterButton.width = 90;
-            //filterButton.height = 20;
+            filterButton.width = 90;
+            filterButton.height = 20;
 
             // Style the buttons to make them look like a menu button.
             clearButton.normalBgSprite = "ButtonMenu";
@@ -112,7 +118,7 @@ namespace SuperChirper
             muteButton.focusedTextColor = new Color32(255, 255, 255, 255);
             muteButton.pressedTextColor = new Color32(30, 30, 44, 255);
 
-            /*
+            
             filterButton.normalBgSprite = "ButtonMenu";
             filterButton.disabledBgSprite = "ButtonMenuDisabled";
             filterButton.hoveredBgSprite = "ButtonMenuHovered";
@@ -123,26 +129,26 @@ namespace SuperChirper
             filterButton.hoveredTextColor = new Color32(7, 132, 255, 255);
             filterButton.focusedTextColor = new Color32(255, 255, 255, 255);
             filterButton.pressedTextColor = new Color32(30, 30, 44, 255);
-             */
+             
 
             // Enable sounds.
             clearButton.playAudioEvents = true;
             muteButton.playAudioEvents = true;
-            //filterButton.playAudioEvents = true;
+            filterButton.playAudioEvents = true;
 
             // Place the button.
             clearButton.transformPosition = new Vector3(-1.22f, 1.0f);
             muteButton.transformPosition = new Vector3(-1.37f, 1.0f);
-            //filterButton.transformPosition = new Vector3(-1.57f, 1.0f);
+            filterButton.transformPosition = new Vector3(-1.57f, 1.0f);
 
             // Respond to button click.
             clearButton.eventClick += ClearButtonClick;
             muteButton.eventClick += MuteButtonClick;
-            //filterButton.eventClick += FilterButtonClick;
+            filterButton.eventClick += FilterButtonClick;
 
             SuperChirperMod.ClearButtonInstance = clearButton;
             SuperChirperMod.MuteButtonInstance = muteButton;
-            //SuperChirperMod.FilterButtonInstance = filterButton;
+            SuperChirperMod.FilterButtonInstance = filterButton;
 
         }
 
@@ -180,6 +186,7 @@ namespace SuperChirper
                     // Set chirper to muted, update sounds, adjust button.
                     SuperChirper.IsMuted = true;
                     chirpPane.m_NotificationSound = null;
+
                     SuperChirperMod.MuteButtonInstance.width = 64;
                     SuperChirperMod.MuteButtonInstance.text = "Unmute";
                 }
@@ -191,7 +198,7 @@ namespace SuperChirper
         {
             if (eventParam.buttons == UIMouseButton.Left && ChirpPanel.instance != null)
             {
-                if (SuperChirper.HasFilters)
+                if (!SuperChirper.HasFilters)
                 {
                     if (SuperChirper.IsFiltered)
                     {
@@ -208,7 +215,7 @@ namespace SuperChirper
                 }
                 else
                 {
-                    chirpPane.AddMessage(new ChirpMessage("SuperChirper", "No filters found. Please install/activate ChirpFilters mod, by Zuppi.", 12345), true);
+                    chirpPane.AddMessage(new ChirpMessage("SuperChirper", "ChirpFilters by Zuppi detected. Please disable if you want to toggle filters.", 12345), true);
                 }
                 
 
