@@ -58,6 +58,7 @@
   <ItemGroup>
     <Compile Include="ChirpFilter.cs" />
     <Compile Include="ChirpMessage.cs" />
+    <Compile Include="OptionsPanel.cs" />
     <Compile Include="SuperChirper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SuperChirperLoader.cs" />
