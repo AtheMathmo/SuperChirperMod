@@ -12,6 +12,7 @@ namespace SuperChirper
     {
          private static ChirpPanel chirpPane;
          private MessageManager messageManager;
+         private GameObject optionsPanel;
 
          private static AudioClip messageSound = null; 
 
@@ -36,6 +37,7 @@ namespace SuperChirper
 
             messageSound = chirpPane.m_NotificationSound;
 
+            #region "ChirpFilters Mod"
             // We check if ChirpFilters mod is installed - if it is we don't worry about handling our own filters.
             GameObject chirperFilter = GameObject.Find("ChirperFilterModule");
             if (chirperFilter != null)
@@ -48,6 +50,7 @@ namespace SuperChirper
                 DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "[SuperChirper] ChirpFilters NOT located.");
                 SuperChirper.HasFilters = false;
             }
+            #endregion
 
             #region "NewGame"
             // Give intro message (only shows up on new level)
@@ -57,25 +60,28 @@ namespace SuperChirper
             chirpPane.AddMessage(introMessage);
             #endregion
 
-
-            // Credit to:
-            // http://www.reddit.com/r/CitiesSkylinesModding/comments/2ymwxe/example_code_using_the_colossal_ui_in_a_user_mod/
-            // https://gist.github.com/reima/9ba51c69f65ae2da7909
-            // https://github.com/skymodteam/skymod-chirpymaid
+            
 
             GameObject clearButtonObject = new GameObject("SuperChirperClearButton", typeof(UIButton));
             GameObject muteButtonObject = new GameObject("SuperChirperMuteButton", typeof(UIButton));
             GameObject filterButtonObject = new GameObject("SuperChirperFilterButton", typeof(UIButton));
+            GameObject optionsButtonObject = new GameObject("SuperChirperOptionsButton", typeof(UIButton));
+            optionsPanel = new GameObject("SuperChirperOptionsPanel", typeof(OptionsPanel));
 
-            // Make the buttonObject a child of the uiView.
+
+            UIView.GetAView().AttachUIComponent(optionsPanel);
+
+            // Make the Objects a child of the uiView.
             clearButtonObject.transform.parent = chirpPane.transform;
             muteButtonObject.transform.parent = chirpPane.transform;
             filterButtonObject.transform.parent = chirpPane.transform;
+            optionsButtonObject.transform.parent = chirpPane.transform;
 
             // Get the button component.
             UIButton clearButton = clearButtonObject.GetComponent<UIButton>();
             UIButton muteButton = muteButtonObject.GetComponent<UIButton>();
             UIButton filterButton = filterButtonObject.GetComponent<UIButton>();
+            UIButton optionsButton = optionsButtonObject.GetComponent<UIButton>();
 
             // Set the text to show on the button.
             clearButton.text = "Clear";
@@ -87,6 +93,8 @@ namespace SuperChirper
             else
                 filterButton.text = "Filters: OFF";
 
+            optionsButton.text = "Options";
+
             // Set the button dimensions. 
             clearButton.width = 50;
             clearButton.height = 20;
@@ -94,6 +102,8 @@ namespace SuperChirper
             muteButton.height = 20;
             filterButton.width = 90;
             filterButton.height = 20;
+            optionsButton.width = 60;
+            optionsButton.height = 20;
 
             // Style the buttons to make them look like a menu button.
             clearButton.normalBgSprite = "ButtonMenu";
@@ -129,26 +139,40 @@ namespace SuperChirper
             filterButton.hoveredTextColor = new Color32(7, 132, 255, 255);
             filterButton.focusedTextColor = new Color32(255, 255, 255, 255);
             filterButton.pressedTextColor = new Color32(30, 30, 44, 255);
-             
+
+            optionsButton.normalBgSprite = "ButtonMenu";
+            optionsButton.disabledBgSprite = "ButtonMenuDisabled";
+            optionsButton.hoveredBgSprite = "ButtonMenuHovered";
+            optionsButton.focusedBgSprite = "ButtonMenuFocused";
+            optionsButton.pressedBgSprite = "ButtonMenuPressed";
+            optionsButton.textColor = new Color32(255, 255, 255, 255);
+            optionsButton.disabledTextColor = new Color32(7, 7, 7, 255);
+            optionsButton.hoveredTextColor = new Color32(7, 132, 255, 255);
+            optionsButton.focusedTextColor = new Color32(255, 255, 255, 255);
+            optionsButton.pressedTextColor = new Color32(30, 30, 44, 255);
 
             // Enable sounds.
             clearButton.playAudioEvents = true;
             muteButton.playAudioEvents = true;
             filterButton.playAudioEvents = true;
+            optionsButton.playAudioEvents = true;
 
             // Place the button.
             clearButton.transformPosition = new Vector3(-1.22f, 1.0f);
             muteButton.transformPosition = new Vector3(-1.37f, 1.0f);
             filterButton.transformPosition = new Vector3(-1.57f, 1.0f);
+            optionsButton.transformPosition = new Vector3(-1.72f, 1.0f);
 
             // Respond to button click.
             clearButton.eventClick += ClearButtonClick;
             muteButton.eventClick += MuteButtonClick;
             filterButton.eventClick += FilterButtonClick;
+            optionsButton.eventClick += OptionsButtonClick;
 
             SuperChirperMod.ClearButtonInstance = clearButton;
             SuperChirperMod.MuteButtonInstance = muteButton;
             SuperChirperMod.FilterButtonInstance = filterButton;
+            SuperChirperMod.OptionsButtonInstance = optionsButton;
 
         }
 
@@ -221,6 +245,24 @@ namespace SuperChirper
 
             }
         }
+
+        private void OptionsButtonClick(UIComponent component, UIMouseEventParameter eventParam)
+        {
+            if (eventParam.buttons == UIMouseButton.Left && ChirpPanel.instance != null)
+            {
+                OptionsPanel panelComponent = optionsPanel.GetComponent<OptionsPanel>();
+                if (panelComponent.isVisible)
+                {
+                    panelComponent.Hide();
+                }
+                else 
+                {
+                    panelComponent.Show();
+                }
+                    
+            }
+        }
+
     }
 }
 

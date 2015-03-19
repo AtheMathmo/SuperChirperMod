@@ -22,6 +22,7 @@ namespace SuperChirper
         private static UIButton clearButtonInstance;
         private static UIButton muteButtonInstance;
         private static UIButton filterButtonInstance;
+        private static UIButton optionsButtonInstance;
 
         public static UIButton ClearButtonInstance
         {
@@ -56,6 +57,18 @@ namespace SuperChirper
             set
             {
                 filterButtonInstance = value;
+            }
+        }
+
+        public static UIButton OptionsButtonInstance
+        {
+            get
+            {
+                return optionsButtonInstance;
+            }
+            set
+            {
+                optionsButtonInstance = value;
             }
         }
 

@@ -19,12 +19,14 @@ namespace SuperChirper
                         SuperChirperMod.ClearButtonInstance.Hide();
                         SuperChirperMod.MuteButtonInstance.Hide();
                         SuperChirperMod.FilterButtonInstance.Hide();
+                        SuperChirperMod.OptionsButtonInstance.Hide();
                     }
                     else if (!SuperChirperMod.ClearButtonInstance.isVisible && ChirpPanel.instance.isShowing)
                     {
                         SuperChirperMod.ClearButtonInstance.Show();
                         SuperChirperMod.MuteButtonInstance.Show();
                         SuperChirperMod.FilterButtonInstance.Show();
+                        SuperChirperMod.OptionsButtonInstance.Show();
                     }
                 }
             }
