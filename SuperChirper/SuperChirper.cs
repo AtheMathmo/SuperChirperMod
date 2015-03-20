@@ -110,6 +110,10 @@ namespace SuperChirper
                 {
                     FilterMessages();
                 }
+
+                // Remove hashtags
+                RemoveHashtags();
+
                  
             }
 
@@ -138,8 +142,9 @@ namespace SuperChirper
             userOpened = chirpPane.isShowing;
             newMsgIn = true;
 
-            DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "[SuperChirper] Message received");
+            ChirpFilter.DeHashTagMessage(message);
 
+            DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "[SuperChirper] Message received");
             if (!isMuted)
             {
                 // Cast message and check whether it should be filtered.
@@ -153,6 +158,7 @@ namespace SuperChirper
                     // Check if we should make noise
                     chirpPane.m_NotificationSound = ((isFiltered && filter) ? null : SuperChirperLoader.MessageSound);
 
+                    // TODO: Change to ChirpMessage in dictionary, to make compatible with hashtag removal.
                     messageFilterMap.Add(message, filter);
                 }
                 else
@@ -166,6 +172,24 @@ namespace SuperChirper
 
         // Custom method to delete messages (currently not used)
         private void DeleteMessage(IChirperMessage message)
+        {
+            Transform container = chirpPane.transform.FindChild("Chirps").FindChild("Clipper").FindChild("Container").gameObject.transform;
+
+            for (int i = 0; i < container.childCount; ++i)
+            {
+                if (container.GetChild(i).GetComponentInChildren<UILabel>().text.Equals(message.text))
+                {
+                    DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "[SuperChirper] Deleted Message:" + message.text);
+                    UITemplateManager.RemoveInstance("ChirpTemplate", container.GetChild(i).GetComponent<UIPanel>());
+                    messageManager.DeleteMessage(message);
+                    if (!userOpened)
+                        chirpPane.Collapse();
+                    return;
+                }
+            }
+        }
+
+        private void DeleteMessage(ChirpMessage message)
         {
             Transform container = chirpPane.transform.FindChild("Chirps").FindChild("Clipper").FindChild("Container").gameObject.transform;
 
@@ -200,6 +224,19 @@ namespace SuperChirper
                 }
             }
             
+        }
+
+        private void RemoveHashtags()
+        {
+            Transform container = chirpPane.transform.FindChild("Chirps").FindChild("Clipper").FindChild("Container").gameObject.transform;
+
+            foreach (IChirperMessage message in messageFilterMap.Keys)
+            {
+                string newMessage = ChirpFilter.DeHashTagMessage(message);
+                DeleteMessage(message);
+                chirpPane.AddMessage(new ChirpMessage(message.senderName,newMessage,message.senderID), true);
+                messageFilterMap.Remove(message);
+            }
         }
     }
 }
