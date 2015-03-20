@@ -43,14 +43,14 @@ public class ChirpMessage : MessageBase
     public override void Serialize(ColossalFramework.IO.DataSerializer s)
     {
         s.WriteSharedString(sender);
-        s.WriteInt32((int) id);
+        s.WriteUInt32(id);
         s.WriteSharedString(message);
     }
 
     public override void Deserialize(ColossalFramework.IO.DataSerializer s)
     {
         sender = s.ReadSharedString();
-        id = (uint) s.ReadInt32();
+        id = s.ReadUInt32();
         message = s.ReadSharedString();
     }
 
