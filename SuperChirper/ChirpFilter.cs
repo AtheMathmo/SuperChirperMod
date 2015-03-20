@@ -49,7 +49,8 @@ namespace SuperChirper
         public static string DeHashTagMessage(IChirperMessage inputMessage)
         {
             string messageText = inputMessage.text;
-            DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "[SuperChirper] Beginning hashtag removal: " + messageText);
+
+            DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "[SuperChirper] Inc. Chirp: "+messageText);
 
             string[] words = messageText.Split(' ');
             List<string> newMessage = new List<string>();
@@ -74,7 +75,6 @@ namespace SuperChirper
             }
 
             string outputMessage = String.Join(" ", newMessage.ToArray());
-            DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "[SuperChirper] DeHashTagged: " + outputMessage);
             return outputMessage;
         }
 
@@ -89,7 +89,25 @@ namespace SuperChirper
                     return false;
                 }
             }
-                return true;
+            // Start at indexCheck - incase indexCheck == 0.
+            for (int j = indexCheck; j >= 0; j--)
+            {
+                char[] word = words[j].ToCharArray();
+
+                if (Char.IsPunctuation(word[word.Length-1]))
+                {
+                    // Break out if we find punctuation before a capital letter.
+                    break;
+                }
+
+                if (Char.IsUpper(word[0]))
+                {
+                    // Found an uppercase - so the word lies in a sentence.
+                    return false;
+                }
+            }
+
+            return true;
         }
 
     }
