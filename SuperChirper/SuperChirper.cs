@@ -73,6 +73,7 @@ namespace SuperChirper
                 messageFilterMap = new Dictionary<IChirperMessage, bool>();            
 
                 DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "[SuperChirper] Initialised modification.");
+
             }
             catch
             {
