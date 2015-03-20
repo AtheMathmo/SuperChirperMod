@@ -28,10 +28,22 @@ namespace SuperChirper
              }
          }
 
+        // For development
+        private void DestroyPanel()
+        {
+            if (optionsPanel != null)
+            {
+                GameObject.Destroy(optionsPanel);
+            }
+        }
+
         public override void OnLevelLoaded(LoadMode mode)
         {
             chirpPane = GameObject.Find("ChirperPanel").GetComponent<ChirpPanel>();
             messageManager = GameObject.Find("MessageManager").GetComponent<MessageManager>();
+
+            // For development
+            DestroyPanel();
 
             if (chirpPane == null) return;
 
