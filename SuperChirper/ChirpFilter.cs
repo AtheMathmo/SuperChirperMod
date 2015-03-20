@@ -46,5 +46,51 @@ namespace SuperChirper
             }
         }
 
+        public static string DeHashTagMessage(IChirperMessage inputMessage)
+        {
+            string messageText = inputMessage.text;
+            DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "[SuperChirper] Beginning hashtag removal: " + messageText);
+
+            string[] words = messageText.Split(' ');
+            List<string> newMessage = new List<string>();
+
+            for (int i = 0; i < words.Length; i++ )
+            {
+                if (words[i].ToCharArray()[0].Equals(Char.Parse("#")))
+                {
+                    // Keep only if not an end word.
+                    if (!CheckEndHashTagWord(i, words))
+                    {
+                        // Remove hashtag
+                        newMessage.Add(words[i].Substring(1, words[i].Length-1));
+
+                    }
+
+                }
+                else
+                {
+                    newMessage.Add(words[i]);
+                }
+            }
+
+            string outputMessage = String.Join(" ", newMessage.ToArray());
+            DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "[SuperChirper] DeHashTagged: " + outputMessage);
+            return outputMessage;
+        }
+
+        private static bool CheckEndHashTagWord(int indexCheck, string[] words)
+        {
+            // Check if punctuation comes after hashtagged word. Return true if not (i.e. it is an end word).
+            for (int j = indexCheck; j < words.Length; j++ )
+            {
+                char[] word = words[j].ToCharArray();
+                if (Char.IsPunctuation(word[word.Length-1]))
+                {
+                    return false;
+                }
+            }
+                return true;
+        }
+
     }
 }
