@@ -43,7 +43,7 @@ namespace SuperChirper
             messageManager = GameObject.Find("MessageManager").GetComponent<MessageManager>();
 
             // For development
-            DestroyPanel();
+            //DestroyPanel();
 
             if (chirpPane == null) return;
 

@@ -21,6 +21,7 @@ namespace SuperChirper
             this.color = new Color32(122, 132, 138, 255);
             this.width = 300;
             this.height = 200;
+            this.transformPosition = new Vector3(-1.0f,0.9f);
 
             // Allow automated layout
             this.autoLayoutDirection = LayoutDirection.Vertical;
@@ -124,6 +125,7 @@ namespace SuperChirper
                     // Set chirper to muted, update sounds.
                     SuperChirper.IsMuted = true;
                     chirpPane.m_NotificationSound = null;
+                    chirpPane.ClearMessages();
 
                     // Adjust button.
                     SuperChirperMod.MuteButtonInstance.text = "Unmute";

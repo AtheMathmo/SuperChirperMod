@@ -50,8 +50,6 @@ namespace SuperChirper
         {
             string messageText = inputMessage.text;
 
-            DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "[SuperChirper] Inc. Chirp: "+messageText);
-
             string[] words = messageText.Split(' ');
             List<string> newMessage = new List<string>();
 

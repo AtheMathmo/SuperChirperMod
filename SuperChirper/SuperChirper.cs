@@ -4,6 +4,7 @@ using ColossalFramework.Plugins;
 using ColossalFramework.UI;
 using ICities;
 using UnityEngine;
+using System.Reflection;
 
 
 namespace SuperChirper
@@ -150,11 +151,11 @@ namespace SuperChirper
 
                 // Toggle chirpy
                 chirpPane.gameObject.SetActive(!chirpPane.gameObject.activeSelf);
-                if (isMuted)
-                {
-                    newMsgIn = true;
-                }
 
+                if (!chirpPane.gameObject.activeSelf)
+                    SuperChirperMod.OptionsPanelInstance.Hide();
+
+                newMsgIn = true;
 
                 /*
                  * TODO:
@@ -218,12 +219,53 @@ namespace SuperChirper
                     DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "[SuperChirper] Deleted Message:" + message.text);
                     // Remove both visual and internal message.
                     UITemplateManager.RemoveInstance("ChirpTemplate", container.GetChild(i).GetComponent<UIPanel>());
+
+                    // Find the original message, remove it from manager.
                     IChirperMessage delMessage;
                     messageMap.TryGetValue(message, out delMessage);
                     messageManager.DeleteMessage(delMessage);
 
+
                     if (!userOpened)
                         chirpPane.Collapse();
+                    return;
+                }
+            }
+        }
+
+        // In development - not used!
+        private void ReplaceMessage(ChirpMessage delMessage, ChirpMessage replaceMessage)
+        {
+            // Get container for chirps
+            Transform container = chirpPane.transform.FindChild("Chirps").FindChild("Clipper").FindChild("Container").gameObject.transform;
+
+            for (int i = 0; i < container.childCount; ++i)
+            {
+                if (container.GetChild(i).GetComponentInChildren<UILabel>().text.Equals(delMessage.GetText()))
+                {
+                    DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "[SuperChirper] Replaced Message:" + delMessage.text);
+                    // Remove both visual and internal message.
+                    UITemplateManager.RemoveInstance("ChirpTemplate", container.GetChild(i).GetComponent<UIPanel>());
+                    chirpPane.AddMessage(replaceMessage, true);
+
+                    // Find the original message, replace it in manager.
+                    MessageBase[] messages = (MessageBase[])typeof(MessageManager).GetField("m_recentMessages", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(MessageManager.instance);
+
+                    for (int j = 0; j < messages.Length; ++j) 
+                    {
+                        if (messages[i].text.Equals(delMessage))
+                        {
+                            DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "[SuperChirper] New Message:" + delMessage.text);
+                            messages[i] = replaceMessage;
+                        }
+                    }
+
+                    //DEBUGGING
+                    MessageBase[] finalMessages = (MessageBase[])typeof(MessageManager).GetField("m_recentMessages", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(MessageManager.instance);
+                    foreach (MessageBase message in finalMessages)
+                    {
+                        DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "[SuperChirper] Final Message:" + message.text);
+                    }
                     return;
                 }
             }
@@ -247,6 +289,7 @@ namespace SuperChirper
                     {
                         DeleteMessage(message);
                         messageFilterMap.Remove(message);
+                        messageMap.Remove(message);
 
                         if (hashTaggedMessages.Contains(message))
                             hashTaggedMessages.Remove(message);
@@ -267,17 +310,21 @@ namespace SuperChirper
 
             foreach (ChirpMessage message in hashTaggedMessages)
             {
-                string newMessageText = ChirpFilter.DeHashTagMessage(message);
+                // Delete old message.
                 DeleteMessage(message);
-
+                
+                // Construct new message without hashtags.
+                string newMessageText = ChirpFilter.DeHashTagMessage(message);
                 ChirpMessage newMessage = new ChirpMessage(message.senderName,newMessageText,message.senderID);
-                chirpPane.AddMessage(newMessage, true);
+
+                chirpPane.AddMessage(newMessage);
+                
 
                 // Clean up
                 bool filtered;
                 messageFilterMap.TryGetValue(message, out filtered);
-                IChirperMessage managerMessage;
-                messageMap.TryGetValue(message, out managerMessage);
+
+                
                 
                 if (messageFilterMap.ContainsKey(message))
                 {
@@ -285,13 +332,15 @@ namespace SuperChirper
                     messageFilterMap.Add(newMessage, filtered);
                 }
 
+                IChirperMessage managerMessage;
+                messageMap.TryGetValue(message, out managerMessage);
+
                 if (messageMap.ContainsKey(message))
                 {
                     messageMap.Remove(message);
                     messageMap.Add(newMessage, managerMessage);
                 }
                 
-
                 hashTaggedMessages.Remove(message);
             }
         }
