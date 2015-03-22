@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using ColossalFramework.Plugins;
 using ColossalFramework.UI;
+using ColossalFramework;
 using ICities;
 using UnityEngine;
 using System.Reflection;
@@ -16,18 +18,22 @@ namespace SuperChirper
         private static MessageManager messageManager;
         private IChirper thisChirper;
 
+        // Message storage - needed to handle filters, hashtag removal and messageManager interaction respectively.
         private Dictionary<ChirpMessage, bool> messageFilterMap;
         private List<ChirpMessage> hashTaggedMessages;
         private Dictionary<ChirpMessage, IChirperMessage> messageMap;
 
-        private bool userOpened = false;
-
+        // SuperChirper states.
         private static bool isMuted = false;
         private static bool isFiltered = false;
         private static bool hasFilters = false;
         private static bool isHashTagged = true;
 
+        // Used to assist with mute functionality
         private bool newMsgIn = false;
+        private bool userOpened = false;
+
+        private float showHideTime;
 
         public static bool IsMuted
         {
@@ -77,9 +83,6 @@ namespace SuperChirper
             }
         }
 
-
-
-
         //Thread: Main
         public override void OnCreated(IChirper chirper)
         {
@@ -93,6 +96,8 @@ namespace SuperChirper
                 messageFilterMap = new Dictionary<ChirpMessage, bool>();
                 hashTaggedMessages = new List<ChirpMessage>();
                 messageMap = new Dictionary<ChirpMessage, IChirperMessage>();
+
+                showHideTime = chirpPane.m_ShowHideTime;
 
                 DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "[SuperChirper] Initialised modification.");
 
@@ -112,6 +117,7 @@ namespace SuperChirper
         //Thread: Main
         public override void OnUpdate()
         {
+            
             if (isMuted)
             {
                 // Collapse and clear only when a new message is received. (Otherwise can not open once muted.)
@@ -160,11 +166,10 @@ namespace SuperChirper
                 /*
                  * TODO:
                  * Stop messages not clearing when we reactivate after muting
-                 * Stop hashtags coming back when we toggle active again - why is this even happening?!
+                 * Fix message manager so that dehashtag messages are stored correctly
                  */
 
             }
-
 
         }
 
@@ -182,10 +187,12 @@ namespace SuperChirper
                 CitizenMessage cm = message as CitizenMessage;
                 ChirpMessage storedMessage = new ChirpMessage(message.senderName, message.text, message.senderID);
 
+                bool filter = ChirpFilter.FilterMessage(cm.m_messageID);
+
                 if (cm != null)
                 {
                     // Check if message is garbage
-                    bool filter = ChirpFilter.FilterMessage(cm.m_messageID);
+                    
 
                     // Check if we should make noise
                     chirpPane.m_NotificationSound = ((isFiltered && filter) ? null : SuperChirperLoader.MessageSound);
@@ -279,7 +286,7 @@ namespace SuperChirper
             foreach (ChirpMessage message in messageFilterMap.Keys)
             {
                 // Check if we flagged it as garbage.
-                bool filtered;
+                bool filtered = false;
                 messageFilterMap.TryGetValue(message, out filtered);
 
                 if (filtered)
@@ -310,32 +317,33 @@ namespace SuperChirper
 
             foreach (ChirpMessage message in hashTaggedMessages)
             {
+                // Set showHide time low to stop overlap.
+                chirpPane.m_ShowHideTime = 0.05f;
+
                 // Delete old message.
                 DeleteMessage(message);
-                
+
                 // Construct new message without hashtags.
                 string newMessageText = ChirpFilter.DeHashTagMessage(message);
                 ChirpMessage newMessage = new ChirpMessage(message.senderName,newMessageText,message.senderID);
 
-                chirpPane.AddMessage(newMessage);
-                
+                chirpPane.StartCoroutine(AddMessageCo(newMessage));
 
-                // Clean up
+                // Set showHide time to normal.
+                chirpPane.m_ShowHideTime = showHideTime;
+
+                // Clean up ...
                 bool filtered;
-                messageFilterMap.TryGetValue(message, out filtered);
 
-                
-                
-                if (messageFilterMap.ContainsKey(message))
+                if (messageFilterMap.TryGetValue(message, out filtered))
                 {
                     messageFilterMap.Remove(message);
                     messageFilterMap.Add(newMessage, filtered);
                 }
 
-                IChirperMessage managerMessage;
-                messageMap.TryGetValue(message, out managerMessage);
+                IChirperMessage managerMessage;  
 
-                if (messageMap.ContainsKey(message))
+                if (messageMap.TryGetValue(message, out managerMessage))
                 {
                     messageMap.Remove(message);
                     messageMap.Add(newMessage, managerMessage);
@@ -344,5 +352,14 @@ namespace SuperChirper
                 hashTaggedMessages.Remove(message);
             }
         }
+
+        // Coroutine for adding delayed messages.
+        IEnumerator AddMessageCo(ChirpMessage message, float waitTime = 0.01f)
+        {
+            yield return new WaitForSeconds(waitTime);
+            chirpPane.AddMessage(message);
+        }
+
+        
     }
 }
