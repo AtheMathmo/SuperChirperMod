@@ -7,9 +7,10 @@ using UnityEngine;
 
 namespace SuperChirper
 {
-    public class OptionsPanel : UIPanel
+    public class ChirperConfigPanel : UIPanel
     {
         private ChirpPanel chirpPane;
+
         public override void Start()
         {
             chirpPane = GameObject.Find("ChirperPanel").GetComponent<ChirpPanel>();
@@ -21,7 +22,7 @@ namespace SuperChirper
             this.color = new Color32(122, 132, 138, 255);
             this.width = 300;
             this.height = 200;
-            this.transformPosition = new Vector3(-1.0f,0.9f);
+            this.transformPosition = new Vector3(-1.0f, 0.9f);
 
             // Allow automated layout
             this.autoLayoutDirection = LayoutDirection.Vertical;
@@ -38,15 +39,15 @@ namespace SuperChirper
             titleLabel.textColor = new Color32(36, 202, 255, 255);
             titleLabel.textAlignment = UIHorizontalAlignment.Center;
 
-            //titleLabel.eventClick += LabelClick;
-
             UIButton muteButton = AddNewButton("Mute");
             UIButton filterButton = AddNewButton("Filters: OFF");
             UIButton hashTagsButton = AddNewButton("HashTags: ON");
 
             // Defaults to ON if ChirpFilter is active.
+            /*
             if (SuperChirper.HasFilters)
                 filterButton.text = "Filters: ON";
+             */
 
             muteButton.eventClick += MuteButtonClick;
             filterButton.eventClick += FilterButtonClick;
@@ -58,6 +59,8 @@ namespace SuperChirper
 
             // Default to hidden
             this.Hide();
+
+            DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "[SuperChirper] ConfigPanel built.");
         }
 
         protected override void OnResolutionChanged(Vector2 previousResolution, Vector2 currentResolution)
