@@ -23,7 +23,7 @@ namespace SuperChirper
         private static UIButton filterButtonInstance;
         private static UIButton optionsButtonInstance;
         private static UIButton hashTagsButtonInstance;
-        private static OptionsPanel optionsPanelInstance;
+        private static ChirperConfigPanel optionsPanelInstance;
 
         public static UIButton ClearButtonInstance
         {
@@ -85,7 +85,7 @@ namespace SuperChirper
             }
         }
 
-        public static OptionsPanel OptionsPanelInstance
+        public static ChirperConfigPanel OptionsPanelInstance
         {
             get
             {
