@@ -12,7 +12,7 @@ namespace SuperChirper
     {
          private static ChirpPanel chirpPane;
          private MessageManager messageManager;
-         private GameObject optionsPanel;
+         private GameObject optionsPanelObject;
 
          private static AudioClip messageSound = null; 
 
@@ -31,9 +31,9 @@ namespace SuperChirper
         // For development
         private void DestroyPanel()
         {
-            if (optionsPanel != null)
+            if (optionsPanelObject != null)
             {
-                GameObject.Destroy(optionsPanel);
+                GameObject.Destroy(optionsPanelObject);
             }
         }
 
@@ -43,7 +43,7 @@ namespace SuperChirper
             messageManager = GameObject.Find("MessageManager").GetComponent<MessageManager>();
 
             // For development
-            //DestroyPanel();
+            DestroyPanel();
 
             if (chirpPane == null) return;
 
@@ -66,7 +66,7 @@ namespace SuperChirper
 
             #region "NewGame"
             // Give intro message (only shows up on new level)
-            ChirpMessage introMessage = new ChirpMessage("SuperChirpy", "Welcome to Super Chirpy! Press Alt+C to toggle Chirpy, use buttons above to MUTE and CLEAR.", 12345);
+            ChirpMessage introMessage = new ChirpMessage("SuperChirpy", "Welcome to Super Chirpy! Press Alt+C to toggle Chirpy, press Clear to delete all chirps, and options to access other features.", 12345);
             // Get rid of default message
             chirpPane.ClearMessages();
             chirpPane.AddMessage(introMessage);
@@ -74,9 +74,7 @@ namespace SuperChirper
 
             GameObject clearButtonObject = new GameObject("SuperChirperClearButton", typeof(UIButton));
             GameObject optionsButtonObject = new GameObject("SuperChirperOptionsButton", typeof(UIButton));
-            optionsPanel = new GameObject("SuperChirperOptionsPanel", typeof(OptionsPanel));
-
-            UIView.GetAView().AttachUIComponent(optionsPanel);
+            optionsPanelObject = new GameObject("SuperChirperOptionsPanel", typeof(ChirperConfigPanel));
 
             // Make the Objects a child of the uiView.
             clearButtonObject.transform.parent = chirpPane.transform;
@@ -85,6 +83,14 @@ namespace SuperChirper
             // Get the button component.
             UIButton clearButton = clearButtonObject.GetComponent<UIButton>();
             UIButton optionsButton = optionsButtonObject.GetComponent<UIButton>();
+            ChirperConfigPanel optionsPanel = optionsPanelObject.GetComponent<ChirperConfigPanel>();
+
+            if (optionsPanel == null)
+            {
+                DebugOutputPanel.AddMessage(PluginManager.MessageType.Message, "[SuperChirper] No ConfigPanel component found.");
+            }
+
+            UIView.GetAView().AttachUIComponent(optionsPanelObject);
 
             // Set the text to show on the button.
             clearButton.text = "Clear";
@@ -125,7 +131,7 @@ namespace SuperChirper
 
             // Place the button.
             clearButton.transformPosition = new Vector3(-1.22f, 1.0f);
-            optionsButton.transformPosition = new Vector3(-1.62f, 1.0f);
+            optionsButton.transformPosition = new Vector3(-1.37f, 1.0f);
 
             // Respond to button click.
             clearButton.eventClick += ClearButtonClick;
@@ -134,7 +140,9 @@ namespace SuperChirper
             SuperChirperMod.ClearButtonInstance = clearButton;
 
             SuperChirperMod.OptionsButtonInstance = optionsButton;
-            SuperChirperMod.OptionsPanelInstance = optionsPanel.GetComponent<OptionsPanel>();
+
+
+            SuperChirperMod.OptionsPanelInstance = optionsPanel;
 
         }
 
@@ -153,7 +161,6 @@ namespace SuperChirper
         {
             if (eventParam.buttons == UIMouseButton.Left && ChirpPanel.instance != null)
             {
-
                 if (SuperChirperMod.OptionsPanelInstance.isVisible)
                 {
                     SuperChirperMod.OptionsPanelInstance.Hide();
